@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useTodos } from "@/hooks/useTodos";
+import { useTodos, useToggleTodo } from "@/hooks/useTodos";
 import type { TodoList as TodoListType } from "@/types";
 import { AlertCircle } from "lucide-react";
 import { TodoItem } from "./TodoItem";
@@ -11,6 +11,11 @@ interface TodoListProps {
 
 export function TodoList({ todoList }: TodoListProps) {
   const { data: todos, isLoading, isError, error } = useTodos(todoList.id);
+  const { mutate: toggleTodo, isPending } = useToggleTodo();
+
+  const handleToggle = (todoId: string, currentCompleted: boolean) => {
+    toggleTodo({ todoId, completed: !currentCompleted });
+  };
 
   return (
     <Card className="flex flex-col">
@@ -23,8 +28,8 @@ export function TodoList({ todoList }: TodoListProps) {
             />
           )}
           <CardTitle className="text-xl">{todoList.title}</CardTitle>
-          {!isLoading && todos && (
-            <span className="ml-auto text-sm text-muted-foreground">
+          {!isLoading && todos && todos.length > 0 && (
+            <span className="ml-auto text-sm font-medium text-muted-foreground transition-all duration-300">
               {todos.filter((t) => t.completed).length} / {todos.length}
             </span>
           )}
@@ -72,7 +77,12 @@ export function TodoList({ todoList }: TodoListProps) {
         {!isLoading && !isError && todos && todos.length > 0 && (
           <div className="space-y-2">
             {todos.map((todo) => (
-              <TodoItem key={todo.id} todo={todo} />
+              <TodoItem
+                key={todo.id}
+                todo={todo}
+                onToggle={() => handleToggle(todo.id, todo.completed)}
+                isDisabled={isPending}
+              />
             ))}
           </div>
         )}

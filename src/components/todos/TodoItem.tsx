@@ -4,13 +4,14 @@ import type { Todo } from "@/types";
 
 interface TodoItemProps {
   todo: Todo;
-  onToggle?: (todoId: string) => void;
+  onToggle?: () => void;
+  isDisabled?: boolean;
 }
 
-export function TodoItem({ todo, onToggle }: TodoItemProps) {
+export function TodoItem({ todo, onToggle, isDisabled }: TodoItemProps) {
   const handleToggle = () => {
-    if (onToggle) {
-      onToggle(todo.id);
+    if (onToggle && !isDisabled) {
+      onToggle();
     }
   };
 
@@ -18,21 +19,24 @@ export function TodoItem({ todo, onToggle }: TodoItemProps) {
     <div
       className={cn(
         "group flex items-start gap-3 rounded-lg border bg-card p-4 transition-all duration-200 hover:shadow-md hover:scale-[1.01]",
-        todo.completed && "bg-muted/50"
+        todo.completed && "bg-muted/50",
+        isDisabled && "opacity-50 pointer-events-none"
       )}
     >
       <Checkbox
         id={`todo-${todo.id}`}
         checked={todo.completed}
         onCheckedChange={handleToggle}
-        className="mt-0.5"
+        disabled={isDisabled}
+        className="mt-0.5 cursor-pointer"
       />
       <div className="flex-1 space-y-1">
         <label
           htmlFor={`todo-${todo.id}`}
           className={cn(
-            "text-sm font-medium leading-none cursor-pointer transition-all duration-200",
-            todo.completed && "line-through text-muted-foreground"
+            "text-sm font-medium leading-none cursor-pointer transition-all duration-300 ease-in-out",
+            todo.completed && "line-through text-muted-foreground",
+            !isDisabled && "hover:text-primary"
           )}
         >
           {todo.title}
@@ -40,7 +44,7 @@ export function TodoItem({ todo, onToggle }: TodoItemProps) {
         {todo.description && (
           <p
             className={cn(
-              "text-sm text-muted-foreground",
+              "text-sm text-muted-foreground transition-all duration-300",
               todo.completed && "line-through"
             )}
           >
