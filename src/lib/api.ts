@@ -131,4 +131,35 @@ async function fetchTodos(todoListId: string): Promise<Todo[]> {
   }));
 }
 
-export { ApiError, fetchApi, fetchTodoLists, fetchTodos, loginUser };
+/**
+ * Update a todo (typically used for toggling completion status)
+ */
+async function updateTodo(
+  todoId: string,
+  updates: Partial<Omit<Todo, "id">>
+): Promise<Todo> {
+  const apiTodo = await fetchApi<ApiTodo>(`/todos/${todoId}`, {
+    method: "PATCH",
+    body: JSON.stringify(updates),
+  });
+
+  return {
+    id: String(apiTodo.id),
+    title: apiTodo.title,
+    description: apiTodo.description,
+    completed: apiTodo.completed,
+    todoListId: String(apiTodo.todoListId),
+    priority: apiTodo.priority,
+    dueDate: apiTodo.dueDate,
+    createdAt: apiTodo.createdAt,
+  };
+}
+
+export {
+  ApiError,
+  fetchApi,
+  fetchTodoLists,
+  fetchTodos,
+  loginUser,
+  updateTodo,
+};
