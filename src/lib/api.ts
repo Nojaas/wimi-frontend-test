@@ -1,4 +1,4 @@
-import type { User } from "@/types";
+import type { ApiTodo, ApiTodoList, Todo, TodoList, User } from "@/types";
 
 const API_BASE_URL = "http://localhost:3001";
 
@@ -17,19 +17,31 @@ async function fetchApi<T>(
   options?: RequestInit
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options?.headers,
-    },
-  });
 
-  if (!response.ok) {
-    throw new ApiError(`API Error: ${response.statusText}`, response.status);
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers,
+      },
+    });
+
+    if (!response.ok) {
+      throw new ApiError(`API Error: ${response.statusText}`, response.status);
+    }
+
+    return response.json();
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    // Network error or other fetch failure
+    throw new ApiError(
+      "Network error. Please check your connection and ensure the API server is running.",
+      0
+    );
   }
-
-  return response.json();
 }
 
 interface ApiUser {
@@ -84,4 +96,39 @@ async function loginUser(
   return { user, token };
 }
 
-export { ApiError, fetchApi, loginUser };
+/**
+ * Fetch all todo lists for a specific user
+ */
+async function fetchTodoLists(userId: string): Promise<TodoList[]> {
+  const apiTodoLists = await fetchApi<ApiTodoList[]>(
+    `/todoLists?userId=${userId}`
+  );
+
+  return apiTodoLists.map((apiList) => ({
+    id: String(apiList.id),
+    title: apiList.title,
+    userId: String(apiList.userId),
+    color: apiList.color,
+    createdAt: apiList.createdAt,
+  }));
+}
+
+/**
+ * Fetch all todos for a specific todo list
+ */
+async function fetchTodos(todoListId: string): Promise<Todo[]> {
+  const apiTodos = await fetchApi<ApiTodo[]>(`/todos?todoListId=${todoListId}`);
+
+  return apiTodos.map((apiTodo) => ({
+    id: String(apiTodo.id),
+    title: apiTodo.title,
+    description: apiTodo.description,
+    completed: apiTodo.completed,
+    todoListId: String(apiTodo.todoListId),
+    priority: apiTodo.priority,
+    dueDate: apiTodo.dueDate,
+    createdAt: apiTodo.createdAt,
+  }));
+}
+
+export { ApiError, fetchApi, fetchTodoLists, fetchTodos, loginUser };
