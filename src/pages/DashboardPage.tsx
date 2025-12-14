@@ -6,12 +6,33 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useTodoLists } from "@/hooks/useTodoLists";
+import { motion } from "framer-motion";
 import { AlertCircle } from "lucide-react";
 import { useEffect } from "react";
 import { toast } from "sonner";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: {
+    opacity: 0,
+    y: 10,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+  },
+};
 
 export function DashboardPage() {
   const { user } = useAuth();
@@ -51,41 +72,6 @@ export function DashboardPage() {
         {/* Main Content */}
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <div className="mt-4">
-            {isLoading && (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {[1, 2, 3, 4].map((i) => (
-                  <div
-                    key={i}
-                    className="flex flex-col rounded-lg border bg-card"
-                  >
-                    {/* Header skeleton */}
-                    <div className="border-b p-6">
-                      <div className="flex items-center gap-3">
-                        <Skeleton className="h-4 w-4 rounded-full shrink-0" />
-                        <Skeleton className="h-6 w-2/3" />
-                        <Skeleton className="ml-auto h-5 w-12" />
-                      </div>
-                    </div>
-                    {/* Content skeleton */}
-                    <div className="flex-1 p-4 space-y-3">
-                      {[1, 2, 3].map((j) => (
-                        <div
-                          key={j}
-                          className="flex items-start gap-3 rounded-lg border p-4"
-                        >
-                          <Skeleton className="mt-0.5 h-4 w-4 rounded shrink-0" />
-                          <div className="flex-1 space-y-2">
-                            <Skeleton className="h-4 w-3/4" />
-                            <Skeleton className="h-3 w-1/2" />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
             {isError && (
               <div className="flex items-center gap-3 rounded-lg border border-destructive/50 bg-destructive/10 p-6 text-destructive">
                 <AlertCircle className="h-5 w-5" />
@@ -98,7 +84,7 @@ export function DashboardPage() {
               </div>
             )}
 
-            {!isLoading && !isError && todoLists && todoLists.length === 0 && (
+            {!isError && todoLists && todoLists.length === 0 && !isLoading && (
               <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed py-24 text-center">
                 <p className="text-lg font-semibold">No todo lists found</p>
                 <p className="mt-2 text-sm text-muted-foreground">
@@ -107,12 +93,23 @@ export function DashboardPage() {
               </div>
             )}
 
-            {!isLoading && !isError && todoLists && todoLists.length > 0 && (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {!isError && todoLists && todoLists.length > 0 && (
+              <motion.div
+                className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+              >
                 {todoLists.map((todoList) => (
-                  <TodoList key={todoList.id} todoList={todoList} />
+                  <motion.div
+                    key={todoList.id}
+                    variants={itemVariants}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <TodoList todoList={todoList} />
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             )}
           </div>
         </div>
