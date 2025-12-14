@@ -1,4 +1,5 @@
-import { fetchTodos, updateTodo } from "@/lib/api";
+import { createTodo, fetchTodos, updateTodo } from "@/lib/api";
+import type { Todo } from "@/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -36,6 +37,30 @@ export function useToggleTodo() {
     onError: (error) => {
       toast.error(
         `Failed to update task: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    },
+  });
+}
+
+export function useCreateTodo() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: Omit<Todo, "id" | "createdAt">) => createTodo(data),
+    onSuccess: (newTodo) => {
+      // Invalidate todos query to refetch and show new todo
+      queryClient.invalidateQueries({
+        queryKey: ["todos", newTodo.todoListId],
+      });
+
+      // Show success toast
+      toast.success("Task created successfully! ✨");
+    },
+    onError: (error) => {
+      toast.error(
+        `Failed to create task: ${
           error instanceof Error ? error.message : "Unknown error"
         }`
       );

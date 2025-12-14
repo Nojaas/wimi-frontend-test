@@ -155,8 +155,37 @@ async function updateTodo(
   };
 }
 
+/**
+ * Create a new todo
+ */
+async function createTodo(data: Omit<Todo, "id" | "createdAt">): Promise<Todo> {
+  const apiTodo = await fetchApi<ApiTodo>("/todos", {
+    method: "POST",
+    body: JSON.stringify({
+      title: data.title,
+      description: data.description,
+      completed: data.completed ?? false,
+      todoListId: Number(data.todoListId),
+      priority: data.priority,
+      dueDate: data.dueDate,
+    }),
+  });
+
+  return {
+    id: String(apiTodo.id),
+    title: apiTodo.title,
+    description: apiTodo.description,
+    completed: apiTodo.completed,
+    todoListId: String(apiTodo.todoListId),
+    priority: apiTodo.priority,
+    dueDate: apiTodo.dueDate,
+    createdAt: apiTodo.createdAt,
+  };
+}
+
 export {
   ApiError,
+  createTodo,
   fetchApi,
   fetchTodoLists,
   fetchTodos,
