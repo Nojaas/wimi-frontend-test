@@ -41,7 +41,7 @@ export function TodoFilters({
             <span
               className={cn(
                 "ml-1.5 px-1.5 py-0.5 text-xs",
-                isActive ? "text-white" : "rounded-full bg-background/80"
+                isActive ? "text-primary-foreground" : "text-muted-foreground"
               )}
             >
               {count}

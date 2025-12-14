@@ -89,6 +89,8 @@ async function loginUser(
     id: String(apiUser.id),
     email: apiUser.email,
     name: `${apiUser.firstName} ${apiUser.lastName}`,
+    avatar: apiUser.avatar,
+    role: apiUser.role,
   };
 
   const token = `mock-jwt-${apiUser.id}-${Date.now()}`;
