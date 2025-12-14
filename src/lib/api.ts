@@ -156,6 +156,15 @@ async function updateTodo(
 }
 
 /**
+ * Delete a todo
+ */
+async function deleteTodo(todoId: string): Promise<void> {
+  await fetchApi(`/todos/${todoId}`, {
+    method: "DELETE",
+  });
+}
+
+/**
  * Create a new todo
  */
 async function createTodo(data: Omit<Todo, "id" | "createdAt">): Promise<Todo> {
@@ -168,6 +177,7 @@ async function createTodo(data: Omit<Todo, "id" | "createdAt">): Promise<Todo> {
       todoListId: Number(data.todoListId),
       priority: data.priority,
       dueDate: data.dueDate,
+      createdAt: new Date().toISOString(),
     }),
   });
 
@@ -186,6 +196,7 @@ async function createTodo(data: Omit<Todo, "id" | "createdAt">): Promise<Todo> {
 export {
   ApiError,
   createTodo,
+  deleteTodo,
   fetchApi,
   fetchTodoLists,
   fetchTodos,

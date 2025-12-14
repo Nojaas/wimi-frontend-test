@@ -1,4 +1,4 @@
-import { createTodo, fetchTodos, updateTodo } from "@/lib/api";
+import { createTodo, deleteTodo, fetchTodos, updateTodo } from "@/lib/api";
 import type { Todo } from "@/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -61,6 +61,52 @@ export function useCreateTodo() {
     onError: (error) => {
       toast.error(
         `Failed to create task: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    },
+  });
+}
+
+export function useUpdateTodo() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      todoId,
+      data,
+    }: {
+      todoId: string;
+      data: Partial<Omit<Todo, "id">>;
+    }) => updateTodo(todoId, data),
+    onSuccess: (updatedTodo) => {
+      queryClient.invalidateQueries({
+        queryKey: ["todos", updatedTodo.todoListId],
+      });
+      toast.success("Task updated successfully! ✓");
+    },
+    onError: (error) => {
+      toast.error(
+        `Failed to update task: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
+    },
+  });
+}
+
+export function useDeleteTodo() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteTodo,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["todos"] });
+      toast.success("Task deleted successfully! 🗑️");
+    },
+    onError: (error) => {
+      toast.error(
+        `Failed to delete task: ${
           error instanceof Error ? error.message : "Unknown error"
         }`
       );
