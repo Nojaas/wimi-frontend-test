@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useTodoLists } from "@/hooks/useTodoLists";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { useEffect } from "react";
 import { toast } from "sonner";
 
@@ -43,21 +43,34 @@ export function DashboardPage() {
       {/* Main Content */}
       <div className="container mx-auto p-6">
         {isLoading && (
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span className="text-sm">Loading your todo lists...</span>
-            </div>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="space-y-3 rounded-lg border p-6">
-                  <Skeleton className="h-6 w-3/4" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-5/6" />
-                  <Skeleton className="h-4 w-4/6" />
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="flex flex-col rounded-lg border bg-card">
+                {/* Header skeleton */}
+                <div className="border-b p-6">
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="h-4 w-4 rounded-full shrink-0" />
+                    <Skeleton className="h-6 w-2/3" />
+                    <Skeleton className="ml-auto h-5 w-12" />
+                  </div>
                 </div>
-              ))}
-            </div>
+                {/* Content skeleton */}
+                <div className="flex-1 p-4 space-y-3">
+                  {[1, 2, 3].map((j) => (
+                    <div
+                      key={j}
+                      className="flex items-start gap-3 rounded-lg border p-4"
+                    >
+                      <Skeleton className="mt-0.5 h-4 w-4 rounded shrink-0" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-4 w-3/4" />
+                        <Skeleton className="h-3 w-1/2" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
