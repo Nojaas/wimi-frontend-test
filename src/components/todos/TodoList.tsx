@@ -128,18 +128,27 @@ export function TodoList({ todoList }: TodoListProps) {
     <Card className="flex flex-col">
       <CardHeader className="border-b">
         <div className="flex items-center gap-3 mb-3">
-          {todoList.color && (
-            <div
-              className="h-4 w-4 rounded-full shrink-0"
-              style={{ backgroundColor: todoList.color }}
-            />
-          )}
-          <CardTitle className="text-xl flex-1">{todoList.title}</CardTitle>
-          {isLoading && <Skeleton className="ml-auto h-5 w-12" />}
-          {!isLoading && todos && todos.length > 0 && (
-            <span className="ml-auto text-sm font-medium text-muted-foreground">
-              {filterCounts.completed} / {filterCounts.all}
-            </span>
+          {isLoading ? (
+            <>
+              <Skeleton className="h-4 w-4 rounded-full shrink-0" />
+              <Skeleton className="h-6 w-48 flex-1" />
+              <Skeleton className="ml-auto h-5 w-12" />
+            </>
+          ) : (
+            <>
+              {todoList.color && (
+                <div
+                  className="h-4 w-4 rounded-full shrink-0"
+                  style={{ backgroundColor: todoList.color }}
+                />
+              )}
+              <CardTitle className="text-xl flex-1">{todoList.title}</CardTitle>
+              {todos && todos.length > 0 && (
+                <span className="ml-auto text-sm font-medium text-muted-foreground">
+                  {filterCounts.completed} / {filterCounts.all}
+                </span>
+              )}
+            </>
           )}
         </div>
         <div className="space-y-3">
@@ -198,15 +207,15 @@ export function TodoList({ todoList }: TodoListProps) {
       <CardContent className="flex-1 p-4">
         {isLoading && (
           <div className="space-y-2">
-            {[1, 2, 3].map((i) => (
+            {[1, 2, 3, 4, 5, 6].map((i) => (
               <div
                 key={i}
-                className="flex items-start gap-3 rounded-lg border p-4"
+                className="flex items-start gap-3 rounded-lg border px-7 py-8"
               >
-                <Skeleton className="h-4 w-4 shrink-0" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-3 w-1/2" />
+                <Skeleton className="h-5 w-5 shrink-0" />
+                <div className="flex-1 space-y-3">
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
                 </div>
               </div>
             ))}
