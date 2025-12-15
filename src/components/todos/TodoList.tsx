@@ -7,13 +7,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { usePaginatedTodos } from "@/hooks/usePaginatedTodos";
 import { useTodos, useToggleTodo } from "@/hooks/useTodos";
-import type { Todo, TodoList as TodoListType } from "@/types";
+import type { TodoList as TodoListType } from "@/types";
 import { AlertCircle, ArrowDownUp } from "lucide-react";
 import { useMemo, useState } from "react";
 import { CreateTodoDialog } from "./CreateTodoDialog";
 import { TodoFilters, type TodoFilter } from "./TodoFilters";
 import { TodoItem } from "./TodoItem";
+import { TodoPagination } from "./TodosPagination";
 
 type SortOption =
   | "default"
@@ -23,8 +25,6 @@ type SortOption =
   | "date-farthest"
   | "created-newest"
   | "created-oldest";
-
-const PRIORITY_ORDER = { high: 3, medium: 2, low: 1 } as const;
 
 interface TodoListProps {
   todoList: TodoListType;
@@ -36,81 +36,24 @@ export function TodoList({ todoList }: TodoListProps) {
   const [activeFilter, setActiveFilter] = useState<TodoFilter>("all");
   const [sortOption, setSortOption] = useState<SortOption>("default");
 
+  // Use custom hook for pagination logic
+  const {
+    paginatedTodos,
+    totalPages,
+    totalItems,
+    startItem,
+    endItem,
+    currentPage,
+    setCurrentPage,
+  } = usePaginatedTodos({
+    todos,
+    activeFilter,
+    sortOption,
+  });
+
   const handleToggle = (todoId: string, currentCompleted: boolean) => {
     toggleTodo({ todoId, completed: !currentCompleted });
   };
-
-  // Filter and sort todos
-  const filteredAndSortedTodos = useMemo(() => {
-    if (!todos) return [];
-
-    // First, filter
-    let filtered: Todo[];
-    switch (activeFilter) {
-      case "active":
-        filtered = todos.filter((todo) => !todo.completed);
-        break;
-      case "completed":
-        filtered = todos.filter((todo) => todo.completed);
-        break;
-      default:
-        filtered = todos;
-    }
-
-    // Then, sort
-    const sorted = [...filtered];
-
-    switch (sortOption) {
-      case "priority-high":
-        return sorted.sort((a, b) => {
-          const aPriority = a.priority ? PRIORITY_ORDER[a.priority] : 0;
-          const bPriority = b.priority ? PRIORITY_ORDER[b.priority] : 0;
-          return bPriority - aPriority;
-        });
-
-      case "priority-low":
-        return sorted.sort((a, b) => {
-          const aPriority = a.priority ? PRIORITY_ORDER[a.priority] : 0;
-          const bPriority = b.priority ? PRIORITY_ORDER[b.priority] : 0;
-          return aPriority - bPriority;
-        });
-
-      case "date-nearest":
-        return sorted.sort((a, b) => {
-          if (!a.dueDate) return 1;
-          if (!b.dueDate) return -1;
-          return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-        });
-
-      case "date-farthest":
-        return sorted.sort((a, b) => {
-          if (!a.dueDate) return 1;
-          if (!b.dueDate) return -1;
-          return new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime();
-        });
-
-      case "created-newest":
-        return sorted.sort((a, b) => {
-          if (!a.createdAt) return 1;
-          if (!b.createdAt) return -1;
-          return (
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
-        });
-
-      case "created-oldest":
-        return sorted.sort((a, b) => {
-          if (!a.createdAt) return 1;
-          if (!b.createdAt) return -1;
-          return (
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-          );
-        });
-
-      default:
-        return sorted;
-    }
-  }, [todos, activeFilter, sortOption]);
 
   // Calculate counts for filter badges
   const filterCounts = useMemo(() => {
@@ -125,7 +68,7 @@ export function TodoList({ todoList }: TodoListProps) {
   }, [todos]);
 
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col gap-2 ">
       <CardHeader className="border-b">
         <div className="flex items-center gap-3 mb-3">
           {isLoading ? (
@@ -144,8 +87,10 @@ export function TodoList({ todoList }: TodoListProps) {
               )}
               <CardTitle className="text-xl flex-1">{todoList.title}</CardTitle>
               {todos && todos.length > 0 && (
-                <span className="ml-auto text-sm font-medium text-muted-foreground">
-                  {filterCounts.completed} / {filterCounts.all}
+                <span className="ml-auto text-xs text-muted-foreground tabular-nums">
+                  {totalItems > 0 && totalPages > 1
+                    ? `${startItem}-${endItem} of ${totalItems}`
+                    : `${filterCounts.completed} / ${filterCounts.all}`}
                 </span>
               )}
             </>
@@ -153,7 +98,7 @@ export function TodoList({ todoList }: TodoListProps) {
         </div>
         <div className="space-y-3">
           {isLoading ? (
-            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-6 w-full" />
           ) : (
             todos &&
             todos.length > 0 && (
@@ -245,7 +190,7 @@ export function TodoList({ todoList }: TodoListProps) {
 
         {!isLoading && !isError && todos && todos.length > 0 && (
           <>
-            {filteredAndSortedTodos.length === 0 ? (
+            {paginatedTodos.length === 0 ? (
               <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed py-8 text-center">
                 <p className="text-sm text-muted-foreground">
                   {activeFilter === "all"
@@ -254,16 +199,24 @@ export function TodoList({ todoList }: TodoListProps) {
                 </p>
               </div>
             ) : (
-              <div className="space-y-2">
-                {filteredAndSortedTodos.map((todo) => (
-                  <TodoItem
-                    key={todo.id}
-                    todo={todo}
-                    onToggle={() => handleToggle(todo.id, todo.completed)}
-                    isDisabled={isPending}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="space-y-2">
+                  {paginatedTodos.map((todo) => (
+                    <TodoItem
+                      key={todo.id}
+                      todo={todo}
+                      onToggle={() => handleToggle(todo.id, todo.completed)}
+                      isDisabled={isPending}
+                    />
+                  ))}
+                </div>
+
+                <TodoPagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={(page) => setCurrentPage(page)}
+                />
+              </>
             )}
           </>
         )}

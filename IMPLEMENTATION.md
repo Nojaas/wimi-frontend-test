@@ -135,20 +135,19 @@ With more time, I would add:
 4. **Notifications** : Reminders for tasks with due dates
 5. **Integration tests** : End-to-end scenarios (login → create todo → toggle)
 
-### Performance Optimizations (if scaling to 1000+ tasks)
+### Performance Optimizations (handling 1000+ tasks)
+
+**Pagination** (implemented):
+
+- I actually chose classic pagination for long lists (10 tasks per page + "Load more") which is much simpler and UX-friendly for this context.
+- Works well up to several hundred tasks before rendering becomes an issue.
 
 **List Virtualization** (@tanstack/react-virtual):
 
-- Render only visible todos + overscan
-- Beneficial for lists with 100+ items
+- Would render only visible todos (+ overscan) for massive lists.
+- Makes sense if you expect 100s-1000s of items.
 
-**Pagination**:
-
-- Show 20 items initially + "Load more"
-- Simpler alternative to virtualization
-- Better suited for very long lists
-
-**Current decision:** With our current lists (<50 todos), everything performs smoothly and does not require optimization. If the app handled hundreds or thousands of items, these optimizations would become relevant, but for now, they would be overkill and too time-consuming for this technical test.
+**My choice:** For this test, classic pagination was more than enough (my lists had <50 items. Virtualization would have been overkill in this context. However, if this were a real backend/API call with potentially very large datasets, virtualization would not be overkill and could become necessary for performance.
 
 ## 🤔 Challenges & Learnings
 

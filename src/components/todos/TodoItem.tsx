@@ -58,7 +58,7 @@ export function TodoItem({ todo, onToggle, isDisabled }: TodoItemProps) {
     <>
       <div
         className={cn(
-          "group flex items-start gap-3 rounded-lg border bg-card p-4 transition-all duration-200 hover:shadow-md hover:scale-[1.01]",
+          "group flex items-start gap-3 rounded-lg border bg-card p-4 transition-all duration-200 hover:shadow-md hover:scale-[1.01] min-h-[125px] max-h-[125px]",
           todo.completed && "bg-muted/50",
           isDisabled && "opacity-50 pointer-events-none"
         )}
@@ -68,34 +68,36 @@ export function TodoItem({ todo, onToggle, isDisabled }: TodoItemProps) {
           checked={todo.completed}
           onCheckedChange={handleToggle}
           disabled={isDisabled}
-          className="mt-0.5 cursor-pointer"
+          className="mt-0.5 cursor-pointer shrink-0"
         />
-        <div className="flex-1 space-y-1">
+        <div className="flex-1 space-y-1 min-w-0 overflow-hidden">
           <label
             htmlFor={`todo-${todo.id}`}
             className={cn(
-              "text-sm font-medium leading-none cursor-pointer transition-all duration-300 ease-in-out",
+              "text-sm font-medium leading-none cursor-pointer transition-all duration-300 ease-in-out block",
               todo.completed && "line-through text-muted-foreground",
               !isDisabled && "hover:text-primary"
             )}
+            title={todo.title}
           >
             {todo.title}
           </label>
           {todo.description && (
             <p
               className={cn(
-                "text-sm text-muted-foreground transition-all duration-300",
+                "text-sm text-muted-foreground transition-all duration-300 line-clamp-2",
                 todo.completed && "line-through"
               )}
+              title={todo.description}
             >
               {todo.description}
             </p>
           )}
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
             {todo.priority && (
               <span
                 className={cn(
-                  "rounded-full px-2 py-0.5 font-medium",
+                  "rounded-full px-2 py-0.5 font-medium shrink-0",
                   todo.priority === "high" &&
                     "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
                   todo.priority === "medium" &&
@@ -108,7 +110,9 @@ export function TodoItem({ todo, onToggle, isDisabled }: TodoItemProps) {
               </span>
             )}
             {todo.dueDate && (
-              <span className="text-muted-foreground">Due: {todo.dueDate}</span>
+              <span className="text-muted-foreground truncate">
+                Due: {todo.dueDate}
+              </span>
             )}
           </div>
         </div>
@@ -118,7 +122,7 @@ export function TodoItem({ todo, onToggle, isDisabled }: TodoItemProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
             >
               <MoreVertical className="h-4 w-4" />
             </Button>

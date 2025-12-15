@@ -25,7 +25,7 @@ export function TodoFilters({
   ];
 
   return (
-    <div className="flex items-center gap-1 rounded-lg border bg-muted/50 p-1">
+    <div className="flex items-center gap-1 rounded-lg border bg-muted/50 p-0.5">
       {filters.map(({ key, label, count }) => {
         const isActive = activeFilter === key;
 
@@ -35,7 +35,7 @@ export function TodoFilters({
             variant={isActive ? "default" : "ghost"}
             size="sm"
             onClick={() => onFilterChange(key)}
-            className="flex-1"
+            className="flex-1 text-xs h-6"
           >
             {label}
             <span
